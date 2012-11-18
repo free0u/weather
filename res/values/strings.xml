@@ -4,5 +4,10 @@
     <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
     <string name="title_activity_main">Weather</string>
+    <string name="today">Сегодня</string>
+    <string name="temp_day_night">-2/+3 C°</string>
+    <string name="windspeed">Скорость ветра (км/ч)</string>
+    <string name="pressure">Давление (мм. рт. ст.)</string>
+    <string name="now">Сейчас</string>
 
 </resources>
