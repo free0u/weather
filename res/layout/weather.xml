@@ -21,12 +21,13 @@
     android:layout_height="wrap_content"
     android:adjustViewBounds="true"
     android:src="@drawable/weather_1" />
-
+
 <TextView
     android:id="@+id/textViewTempNow"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
+    android:layout_marginLeft="5dp"
     android:text="@string/temp_day_night"
     android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -90,14 +91,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/forecast" />
-
-    <ListView
-        android:id="@+id/listViewWeather"
+
+    <LinearLayout
+        android:id="@+id/linearLayoutWeatherList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1" >
+        android:orientation="vertical" >
 
-    </ListView>
+        <TextView
+            android:id="@+id/textView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TextView" />
+
+    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -109,13 +116,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/lastupdated" />
-
+
         <TextView
             android:id="@+id/textViewLastUpdated"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="5dp"
-            android:text="Never updated" />
+            android:text="@string/neverupdated" />
 
     </LinearLayout>
 

@@ -1,49 +1,76 @@
 package ru.free0u.weather;
 
+import java.io.BufferedInputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends Activity implements OnClickListener{
+public class MainActivity extends Activity implements OnClickListener, OnItemSelectedListener {
 	Weather weather;
 	ArrayList<Map<String, Object>> weatherListData;
-	MySimpleAdapter ad;	
 	boolean updateButtonIsActive = true;
+	LayoutInflater inflater;
 	
-	private void setUpWeatherList() {
-		weatherListData = new ArrayList<Map<String,Object>>();
-		String[] from = {weather.ATTRIBUTE_NAME_IMAGE, weather.ATTRIBUTE_NAME_TEMPERATURE};
-		int[] to = {R.id.imageIcon, R.id.textTemp};
-		ad = new MySimpleAdapter(this, weatherListData, R.layout.weather_item, from, to);
-		
-		ListView lv = (ListView)findViewById(R.id.listViewWeather);
-        lv.setAdapter(ad);
-	}
+	final String ATTRIBUTE_NAME_CITIES = "cities";
+	String[] cities = null;
+	private int curPosCity;
 	
 	// change UI - update weather forecast
 	private void updateForecastWeather(ArrayList<Map<String, Object>> data) {
-		weatherListData.clear();
-		weatherListData.addAll(data);
-		ad.notifyDataSetChanged();
+		LinearLayout lin = (LinearLayout)findViewById(R.id.linearLayoutWeatherList);
+		lin.removeAllViewsInLayout();
+		
+		for (int i = 0; i < data.size(); ++i) {
+			Map<String, Object> day = data.get(i);
+			
+			View v = inflater.inflate(R.layout.weather_item, null, false);
+			
+			TextView tv = (TextView)v.findViewById(R.id.textViewDate);
+			tv.setText((String)day.get(weather.ATTRIBUTE_NAME_DATE));
+			
+			tv = (TextView)v.findViewById(R.id.textTemp);
+			tv.setText((String)day.get(weather.ATTRIBUTE_NAME_TEMPERATURE));
+			
+			ImageView iv = (ImageView)v.findViewById(R.id.imageIconWeather);
+			ImageViewSetter task = new ImageViewSetter(iv);
+			task.execute((String)day.get(weather.ATTRIBUTE_NAME_URL_ICON));
+			
+			lin.addView(v);
+			
+		}
+		
 	}
 
 	// change UI - update current weather
@@ -55,7 +82,8 @@ public class MainActivity extends Activity implements OnClickListener{
 		
 		// temperature
 		TextView tv = (TextView)findViewById(R.id.textViewTempNow);
-		tv.setText(data.get(weather.ATTRIBUTE_NAME_TEMPERATURE));
+		tv.setText(data.get(weather.ATTRIBUTE_NAME_TEMPERATURE) + " " +
+				getResources().getString(R.string.celsius));
 		
 		// wind
 		tv = (TextView)findViewById(R.id.textViewWindNow);
@@ -67,7 +95,8 @@ public class MainActivity extends Activity implements OnClickListener{
 		
 		// update "last updated" field
 		tv = (TextView)findViewById(R.id.textViewLastUpdated);
-		tv.setText(weather.getLastUpdated());
+		String lastUpd = weather.getLastUpdated();
+		tv.setText(lastUpd == null ? getResources().getString(R.string.neverupdated) : lastUpd);
 	}
 	
 	
@@ -77,20 +106,86 @@ public class MainActivity extends Activity implements OnClickListener{
 	}
 	
 	
+	private Set<String> readCitiesFromPreferences() {
+		SharedPreferences pref = getPreferences(MODE_PRIVATE);
+		Set<String> res = pref.getStringSet(ATTRIBUTE_NAME_CITIES, null);
+		return res;
+	}
+	
+	private void writeCitiesIntoPreferences(Set<String> set) {
+		SharedPreferences pref = getPreferences(MODE_PRIVATE);
+		Editor ed = pref.edit();
+		ed.putStringSet(ATTRIBUTE_NAME_CITIES, set);
+		ed.commit();
+		
+	}
+	
+	private String[] setOfStringToArray(Set<String> set) {
+		if (set == null) {
+			return new String[0];
+		}
+		String[] res = new String[set.size()];
+		int cnt = 0;
+		for (String s : set) {
+			res[cnt++] = s;
+		}
+		return res;
+	}
+	
+	private void setUpSpinner() {
+		curPosCity = 0;
+		
+		Spinner spinner = (Spinner)findViewById(R.id.spinner1);
+		ArrayAdapter<String> ad = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, cities);
+    	ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+    	spinner.setAdapter(ad);
+    	spinner.setOnItemSelectedListener(this);
+	}
+	
+	private void addCity(String s) {
+		Log.i("test", s);
+		HashSet<String> set = (HashSet<String>) readCitiesFromPreferences();
+		if (set == null) {
+			set = new HashSet<String>(); 
+		}
+		
+		set.add(s);
+		cities = setOfStringToArray(set);
+		writeCitiesIntoPreferences(set);
+		
+		setUpSpinner();
+		updateWeather();
+	}
+	
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (data == null) return;
+		addCity(data.getStringExtra("city"));
+	}
+	
+	public void onItemSelected(AdapterView<?> arg0, View arg1, int pos,
+			long arg3) {
+		Log.i("cities", "Pos: " + pos);
+		if (curPosCity != pos) {
+			curPosCity = pos;
+			updateWeather();
+		}
+	}
+
+	public void onNothingSelected(AdapterView<?> arg0) {
+	}
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-    
+   
         weather = new Weather();
         
         // add weather.xml view
         LinearLayout lin = (LinearLayout)findViewById(R.id.weatherLayout);
-        LayoutInflater inf = getLayoutInflater();
-        inf.inflate(R.layout.weather, lin, true);
-
-        // add weather forecast list
-        setUpWeatherList();
+        inflater = getLayoutInflater();
+        inflater.inflate(R.layout.weather, lin, true);
         
         // setup buttons
         ImageView updateButton = (ImageView)findViewById(R.id.imageViewUpdate);
@@ -98,7 +193,15 @@ public class MainActivity extends Activity implements OnClickListener{
         ImageView addButton = (ImageView)findViewById(R.id.imageViewAdd);
         addButton.setOnClickListener(this);
     
-        updateWeather();
+        // setup spinner
+        cities = setOfStringToArray(readCitiesFromPreferences());
+        if (cities.length == 0) {
+        	Intent intent = new Intent(this, CitiesActivity.class);
+    		startActivityForResult(intent, 0);
+        } else {
+        	setUpSpinner();
+            updateWeather();
+        }
     }
     
     public void onClick(View v) {
@@ -110,28 +213,52 @@ public class MainActivity extends Activity implements OnClickListener{
     		}
     		break;
     	case R.id.imageViewAdd:
-    		Log.i("test", "add button");
+    		Intent intent = new Intent(this, CitiesActivity.class);
+    		startActivityForResult(intent, 0);
     		break;
     	}
     	
 	}
     
     class WeatherDownloader extends AsyncTask<Void, Void, String> {
-    	String url;
+    	String urlData;
     	
     	@Override
     	protected void onPreExecute() {
-    		url = weather.urlData;
+    		// TODO change city
+    		//urlData = weather.getUrl("St+Petersburg");
+    		//urlData = weather.getUrl("Bangkok");
+    		urlData = weather.getUrl(cities[curPosCity]);
+    		
     		updateButtonIsActive = false;
     		
     		Toast t = Toast.makeText(getApplicationContext(), "Weather downloading...", Toast.LENGTH_SHORT);
     		t.show();
     	}
     	
+    	protected String convertStreamToString(InputStream is) {
+    	    java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+    	    return s.hasNext() ? s.next() : "";
+    	}
+    	
 		@Override
 		protected String doInBackground(Void... arg0) {
 			// TODO get json
-			return null;
+			
+			String res = "";
+			HttpURLConnection conn = null;
+			try {
+				URL url = new URL(urlData);
+				conn = (HttpURLConnection)url.openConnection();
+				InputStream in = new BufferedInputStream(conn.getInputStream());
+				res = convertStreamToString(in);
+			}
+			catch (Exception ignore) {
+			}
+			finally {
+				conn.disconnect();
+			}
+			return res;
 		}
     	
 		@Override
@@ -139,27 +266,13 @@ public class MainActivity extends Activity implements OnClickListener{
 			updateButtonIsActive = true;
 			
 			// change UI:
-			updateForecastWeather(weather.getForecastWeather(data));
-			updateCurrentWeather(weather.getCurrentWeather(data));
+			if (data != null) {
+				updateForecastWeather(weather.getForecastWeather(data));
+				updateCurrentWeather(weather.getCurrentWeather(data));
+			}
 			
 			Toast t = Toast.makeText(getApplicationContext(), "Weather downloaded!", Toast.LENGTH_SHORT);
     		t.show();
-		}
-    }
-    
-    // SimpleAdapter with AsyncTask downloading image into ImageView
-    class MySimpleAdapter extends SimpleAdapter {
-
-		public MySimpleAdapter(Context context,
-				List<? extends Map<String, ?>> data, int resource,
-				String[] from, int[] to) {
-			super(context, data, resource, from, to);
-		}
-    	
-		@Override 
-		public void setViewImage(ImageView v, String text) {
-			ImageViewSetter task = new ImageViewSetter(v);
-	        task.execute(text);
 		}
     }
     
@@ -191,6 +304,8 @@ public class MainActivity extends Activity implements OnClickListener{
 			v.setImageBitmap(bm);
 		}
     }
+
+	
 
 	
 }

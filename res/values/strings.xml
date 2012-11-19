@@ -11,5 +11,8 @@
     <string name="now">Сейчас:</string>
     <string name="forecast">Прогноз на 3 дня:</string>
     <string name="lastupdated">Обновлено: </string>
+    <string name="neverupdated">не обновлялось</string>
+    <string name="celsius">°C</string>
+    <string name="find">Поиск</string>
 
 </resources>
