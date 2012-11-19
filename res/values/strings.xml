@@ -8,6 +8,7 @@
     <string name="temp_day_night">-2/+3 C°</string>
     <string name="windspeed">Скорость ветра (км/ч)</string>
     <string name="pressure">Давление (мм. рт. ст.)</string>
-    <string name="now">Сейчас</string>
+    <string name="now">Сейчас:</string>
+    <string name="forecast">Прогноз на 3 дня:</string>
 
 </resources>

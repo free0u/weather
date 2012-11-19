@@ -19,9 +19,9 @@
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:layout_weight="0.32" />
-
+
         <ImageView
-            android:id="@+id/imageView1"
+            android:id="@+id/imageViewAdd"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="5dp"
@@ -29,15 +29,16 @@
             android:maxHeight="35dp"
             android:maxWidth="35dp"
             android:src="@drawable/add" />
-
+
         <ImageView
-            android:id="@+id/imageView2"
+            android:id="@+id/imageViewUpdate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="5dp"
             android:adjustViewBounds="true"
             android:maxHeight="35dp"
             android:src="@drawable/update" />
+
     </LinearLayout>
 
     <LinearLayout
