@@ -101,19 +101,21 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
 	
 	
 	private void updateWeather() {
-		WeatherDownloader task = new WeatherDownloader();
-		task.execute();
+		if (curPosCity < cities.length) {
+			WeatherDownloader task = new WeatherDownloader();
+			task.execute();
+		}
 	}
 	
 	
 	private Set<String> readCitiesFromPreferences() {
-		SharedPreferences pref = getPreferences(MODE_PRIVATE);
+		SharedPreferences pref = getSharedPreferences("cities", MODE_PRIVATE);
 		Set<String> res = pref.getStringSet(ATTRIBUTE_NAME_CITIES, null);
 		return res;
 	}
 	
 	private void writeCitiesIntoPreferences(Set<String> set) {
-		SharedPreferences pref = getPreferences(MODE_PRIVATE);
+		SharedPreferences pref = getSharedPreferences("cities", MODE_PRIVATE);
 		Editor ed = pref.edit();
 		ed.putStringSet(ATTRIBUTE_NAME_CITIES, set);
 		ed.commit();
@@ -160,7 +162,12 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (data == null) return;
-		addCity(data.getStringExtra("city"));
+		if (data.hasExtra("city")) {
+			addCity(data.getStringExtra("city"));
+		}
+		cities = setOfStringToArray(readCitiesFromPreferences());
+		setUpSpinner();
+		updateWeather();
 	}
 	
 	public void onItemSelected(AdapterView<?> arg0, View arg1, int pos,

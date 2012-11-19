@@ -26,6 +26,13 @@
             android:text="@string/find" />
 
     </LinearLayout>
+
+    <Button
+        android:id="@+id/button2"
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="106dp"
+        android:layout_height="wrap_content"
+        android:text="Clear all city in memory" />
 
     <ListView
         android:id="@+id/listViewCities"
