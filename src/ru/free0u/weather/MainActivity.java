@@ -64,6 +64,7 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
 			tv.setText((String)day.get(weather.ATTRIBUTE_NAME_TEMPERATURE));
 			
 			ImageView iv = (ImageView)v.findViewById(R.id.imageIconWeather);
+			iv.setImageBitmap(null);
 			ImageViewSetter task = new ImageViewSetter(iv);
 			task.execute((String)day.get(weather.ATTRIBUTE_NAME_URL_ICON));
 			
@@ -77,6 +78,7 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
 	private void updateCurrentWeather(Map<String, String> data) {
 		// icon
 		ImageView icon = (ImageView)findViewById(R.id.imageWeatherNow);
+		icon.setImageBitmap(null);
 		ImageViewSetter task = new ImageViewSetter(icon);
 		task.execute(data.get(weather.ATTRIBUTE_NAME_URL_ICON));
 		
