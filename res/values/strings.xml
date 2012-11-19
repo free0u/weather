@@ -10,5 +10,6 @@
     <string name="pressure">Давление (мм. рт. ст.)</string>
     <string name="now">Сейчас:</string>
     <string name="forecast">Прогноз на 3 дня:</string>
+    <string name="lastupdated">Обновлено: </string>
 
 </resources>

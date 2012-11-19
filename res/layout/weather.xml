@@ -90,12 +90,33 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/forecast" />
-
+
     <ListView
         android:id="@+id/listViewWeather"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content"
+        android:layout_weight="1" >
 
     </ListView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp" >
+
+        <TextView
+            android:id="@+id/textView6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/lastupdated" />
+
+        <TextView
+            android:id="@+id/textViewLastUpdated"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:text="Never updated" />
+
+    </LinearLayout>
 
 </LinearLayout>
