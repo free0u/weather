@@ -14,5 +14,7 @@
     <string name="neverupdated">не обновлялось</string>
     <string name="celsius">°C</string>
     <string name="find">Поиск</string>
+    <string name="nothingfound">Ничего не найдено</string>
+    <string name="clear">Удалить города из памяти</string>
 
 </resources>

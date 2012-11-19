@@ -7,13 +7,14 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
-
+
         <EditText
             android:id="@+id/editTextFind"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:ems="10" >
+            android:ems="10"
+            android:hint="English please" >
 
             <requestFocus />
         </EditText>
@@ -26,13 +27,24 @@
             android:text="@string/find" />
 
     </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
 
-    <Button
-        android:id="@+id/button2"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="106dp"
-        android:layout_height="wrap_content"
-        android:text="Clear all city in memory" />
+        <Button
+            android:id="@+id/button2"
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="170dp"
+            android:layout_height="wrap_content"
+            android:text="@string/clear" />
+
+        <TextView
+            android:id="@+id/textViewStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
 
     <ListView
         android:id="@+id/listViewCities"

@@ -47,9 +47,15 @@ public class CitiesActivity extends Activity implements OnClickListener {
     }
 
 	private void setUpList(String[] arr) {
-		//String[] cities2 = {"Moscow", "St Petersburg"};
-		//arr = cities2;
 		cities = arr;
+		
+		TextView tv = (TextView)findViewById(R.id.textViewStatus);
+		if (arr.length == 0) {
+			tv.setText(getResources().getString(R.string.nothingfound));
+		} else
+		{
+			tv.setText("");
+		}
 		
 		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arr);
 		listView.setAdapter(adapter);
