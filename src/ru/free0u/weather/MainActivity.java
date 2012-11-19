@@ -97,6 +97,15 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
 		tv = (TextView)findViewById(R.id.textViewLastUpdated);
 		String lastUpd = weather.getLastUpdated();
 		tv.setText(lastUpd == null ? getResources().getString(R.string.neverupdated) : lastUpd);
+		
+		// city name
+		tv = (TextView)findViewById(R.id.textViewCityName);
+		if (curPosCity < cities.length) {
+			tv.setText(cities[curPosCity]);
+		} else
+		{
+			tv.setText("");
+		}
 	}
 	
 	
@@ -122,6 +131,15 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
 		
 	}
 	
+	private void addCity(String s) {
+		HashSet<String> set = (HashSet<String>) readCitiesFromPreferences();
+		if (set == null) {
+			set = new HashSet<String>(); 
+		}
+		set.add(s);
+		writeCitiesIntoPreferences(set);
+	}
+	
 	private String[] setOfStringToArray(Set<String> set) {
 		if (set == null) {
 			return new String[0];
@@ -142,21 +160,6 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
     	ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
     	spinner.setAdapter(ad);
     	spinner.setOnItemSelectedListener(this);
-	}
-	
-	private void addCity(String s) {
-		Log.i("test", s);
-		HashSet<String> set = (HashSet<String>) readCitiesFromPreferences();
-		if (set == null) {
-			set = new HashSet<String>(); 
-		}
-		
-		set.add(s);
-		cities = setOfStringToArray(set);
-		writeCitiesIntoPreferences(set);
-		
-		setUpSpinner();
-		updateWeather();
 	}
 	
 	@Override
@@ -232,9 +235,6 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
     	
     	@Override
     	protected void onPreExecute() {
-    		// TODO change city
-    		//urlData = weather.getUrl("St+Petersburg");
-    		//urlData = weather.getUrl("Bangkok");
     		urlData = weather.getUrl(cities[curPosCity]);
     		
     		updateButtonIsActive = false;
@@ -250,8 +250,6 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
     	
 		@Override
 		protected String doInBackground(Void... arg0) {
-			// TODO get json
-			
 			String res = "";
 			HttpURLConnection conn = null;
 			try {

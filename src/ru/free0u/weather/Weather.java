@@ -58,6 +58,16 @@ public class Weather {
 		return url;
 	}
 	
+	public String getCityUrl(String city) {
+		String url = "http://www.worldweatheronline.com/feed/search.ashx?key=396acb677e180947121811&num_of_results=3&format=json&query=";
+		try {
+			city = URLEncoder.encode(city, "UTF-8");
+		} catch (Exception ignore) {
+		}
+		url += city;
+		return url;
+	}
+	
 	public String getLastUpdated() {
 		if (lastUpdated == 0) {
 			return null;
@@ -130,6 +140,32 @@ public class Weather {
 			Log.i("json", "exception");
 		}
 		
+		
+		return res;
+	}
+
+	public String[] parseCities(String jString) {
+		String[] res = new String[0];
+		
+		
+		try {
+			JSONObject ob = new JSONObject(jString);
+			
+			JSONArray cities = ob.getJSONObject("search_api").getJSONArray("result");
+			
+			res = new String[cities.length()];
+			for (int i = 0; i < cities.length(); ++i) {
+				JSONObject city = cities.getJSONObject(i);
+				
+				String areaName = city.getJSONArray("areaName").getJSONObject(0).getString("value");
+				String country = city.getJSONArray("country").getJSONObject(0).getString("value");
+				String region = city.getJSONArray("region").getJSONObject(0).getString("value");
+
+				//Log.i("test", areaName + ", " + country);
+				res[i] = areaName + ", " + country + " (" + region + ")";
+			}
+		} catch (JSONException e) {
+		}
 		
 		return res;
 	}

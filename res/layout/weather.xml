@@ -125,5 +125,12 @@
             android:text="@string/neverupdated" />
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/textViewCityName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="city_name"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 
 </LinearLayout>
