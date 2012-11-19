@@ -64,6 +64,10 @@ public class MainActivity extends Activity implements OnClickListener{
 		// pressure
 		tv = (TextView)findViewById(R.id.TextViewPressureNow);
 		tv.setText(data.get(weather.ATTRIBUTE_NAME_PRESSURE));
+		
+		// update "last updated" field
+		tv = (TextView)findViewById(R.id.textViewLastUpdated);
+		tv.setText(weather.getLastUpdated());
 	}
 	
 	

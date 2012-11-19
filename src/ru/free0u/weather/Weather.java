@@ -1,6 +1,8 @@
 package ru.free0u.weather;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,13 +15,25 @@ public class Weather {
 	final String ATTRIBUTE_NAME_WIND = "wind";
 	final String ATTRIBUTE_NAME_URL_ICON = "url_icon";
 	
-	
-	
 	final String ATTRIBUTE_NAME_IMAGE = "image";
 	final String urlIcon = "http://www.worldweatheronline.com/images/wsymbols01_png_64/wsymbol_0033_cloudy_with_light_rain_night.png";
 	
 	final String urlData = "http://free.worldweatheronline.com/feed/weather.ashx?q=St+Petersburg&format=json&num_of_days=3&key=396acb677e180947121811";
 
+	
+	long lastUpdated;
+	
+	private void updateTime() {
+		lastUpdated = System.currentTimeMillis();
+	}
+
+	public String getLastUpdated() {
+		Date a = new Date(lastUpdated);
+		
+		SimpleDateFormat ft = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
+		return ft.format(a);
+	}
+	
 	
 	private String prettyTemp(String a, String b) {
 		return a + "/" + b + " C";
@@ -31,10 +45,14 @@ public class Weather {
 
 	
 	public ArrayList<Map<String, Object>> getForecastWeather(String data) {
+		updateTime();
+		
 		return getData();
 	}
 	
 	public Map<String, String> getCurrentWeather(String data) {
+		updateTime();
+		
 		HashMap<String, String> m = new HashMap<String, String>();
 		m.put(ATTRIBUTE_NAME_TEMPERATURE, "+20");
 		m.put(ATTRIBUTE_NAME_PRESSURE, "743");
@@ -44,6 +62,8 @@ public class Weather {
 	}
 	
 	public ArrayList<Map<String, Object>> getData() {
+		updateTime();
+		
 		ArrayList<Map<String, Object>> res = new ArrayList<Map<String, Object>>();
 		for (int i = 0; i < 3; ++i) {
 			HashMap<String, Object> m = new HashMap<String, Object>();
