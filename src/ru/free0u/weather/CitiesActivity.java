@@ -6,6 +6,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -13,6 +14,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import android.widget.AdapterView.OnItemClickListener;
 public class CitiesActivity extends Activity implements OnClickListener {
@@ -68,6 +70,9 @@ public class CitiesActivity extends Activity implements OnClickListener {
 			String s = et.getText().toString();
 			CityDownloader task = new CityDownloader(s);
 			task.execute();
+			
+			InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.hideSoftInputFromWindow(et.getWindowToken(), 0);
 			break;
 		case R.id.button2: // clear
 			SharedPreferences pref = getSharedPreferences("cities", MODE_PRIVATE);
