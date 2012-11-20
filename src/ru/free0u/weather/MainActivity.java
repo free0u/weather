@@ -7,35 +7,21 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
-
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
+import android.widget.*;
 import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
-import android.widget.Spinner;
-import android.widget.TextView;
-import android.widget.Toast;
 
 public class MainActivity extends Activity implements OnClickListener, OnItemSelectedListener {
 	Weather weather;
@@ -177,7 +163,6 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
 	
 	public void onItemSelected(AdapterView<?> arg0, View arg1, int pos,
 			long arg3) {
-		Log.i("cities", "Pos: " + pos);
 		if (curPosCity != pos) {
 			curPosCity = pos;
 			updateWeather();
@@ -296,7 +281,6 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
 		@Override
 		protected Bitmap doInBackground(String... arg0) {
 			Bitmap bm = null;
-			String url = arg0[0];
 			try {
 		        URLConnection conn = new URL(arg0[0]).openConnection();
 		        conn.connect();

@@ -1,18 +1,13 @@
 package ru.free0u.weather;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.json.*;
 
-import android.content.Context;
-import android.net.Uri;
-import android.util.Log;
 
 public class Weather {
 
@@ -137,7 +132,6 @@ public class Weather {
 			}
 			
 		} catch (JSONException e) {
-			Log.i("json", "exception");
 		}
 		
 		
@@ -161,7 +155,6 @@ public class Weather {
 				String country = city.getJSONArray("country").getJSONObject(0).getString("value");
 				String region = city.getJSONArray("region").getJSONObject(0).getString("value");
 
-				//Log.i("test", areaName + ", " + country);
 				res[i] = areaName + ", " + country + " (" + region + ")";
 			}
 		} catch (JSONException e) {
