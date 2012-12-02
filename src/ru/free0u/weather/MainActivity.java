@@ -113,7 +113,7 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
 			String city = cities.get(curPosCity);
 			int lastUpd = weatherDatabase.getUpdateTime(city);
 			int curTime = WeatherHelper.getUnixTime();
-			if (!needDownload && (curTime - lastUpd < updateTime)) { // обновлено меньше минуты назад
+			if (!needDownload && (curTime - lastUpd < updateTime)) {
 				updateCurrentWeather(weatherDatabase.getCurrentWeather(city));
 				updateForecastWeather(weatherDatabase.getForecastWeather(city));
 			} else {

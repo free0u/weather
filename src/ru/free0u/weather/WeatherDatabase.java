@@ -1,16 +1,21 @@
 package ru.free0u.weather;
 
+import java.io.BufferedInputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 public class WeatherDatabase {
 	final String LOG_TAG = "db";
@@ -49,8 +54,7 @@ public class WeatherDatabase {
 		
 		//c = db.query("cities inner join weather on cities.id = weather.city_id", null, null, null, null, null, null);
 		c = db.query("cities", null, null, null, null, null, null);
-		logCursor(c);
-		
+		//logCursor(c);
 		
 		// ==
 		
@@ -170,7 +174,8 @@ public class WeatherDatabase {
 		if (c.moveToFirst()) {
 			do {
 				String city = c.getString(c.getColumnIndex("title"));
-				// TODO updating code
+				WeatherUpdater task = new WeatherUpdater(city);
+				task.execute();
 			} while (c.moveToNext());
 		}
 	}
@@ -276,4 +281,57 @@ public class WeatherDatabase {
 			}
 		}
 	}
+	
+	class WeatherUpdater extends AsyncTask<Void, Void, String> {
+    	String urlData;
+    	String city;
+    	
+    	public WeatherUpdater(String city) {
+    		this.city = city;
+    	}
+    	
+    	@Override
+    	protected void onPreExecute() {
+    		urlData = weather.getUrl(city);
+    	}
+    	
+    	protected String convertStreamToString(InputStream is) {
+    	    java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+    	    return s.hasNext() ? s.next() : "";
+    	}
+    	
+		@Override
+		protected String doInBackground(Void... arg0) {
+			String res = "";
+			HttpURLConnection conn = null;
+			try {
+				URL url = new URL(urlData);
+				conn = (HttpURLConnection)url.openConnection();
+				InputStream in = new BufferedInputStream(conn.getInputStream());
+				res = convertStreamToString(in);
+			}
+			catch (Exception ignore) {
+			}
+			finally {
+				conn.disconnect();
+			}
+			return res;
+		}
+    	
+		@Override
+		protected void onPostExecute(String data) {
+			// update db
+			if (data != null) {
+				ArrayList<Map<String, Object>> data1 = weather.getForecastWeather(data);
+				updateForecastWeather(city, data1);
+				
+				Map<String, String> data2 = weather.getCurrentWeather(data);
+				updateCurrentWeather(city, data2);
+				
+				// TODO delete toast
+				Toast t = Toast.makeText(context, "Updated all", Toast.LENGTH_SHORT);
+	    		t.show();
+			}
+		}
+    }
 }
