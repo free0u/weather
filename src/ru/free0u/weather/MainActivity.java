@@ -6,15 +6,12 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
+
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
@@ -30,8 +27,13 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
 	LayoutInflater inflater;
 	
 	final String ATTRIBUTE_NAME_CITIES = "cities";
-	String[] cities = null;
+	ArrayList<String> cities = null;
 	private int curPosCity;
+	
+	int updateTime = 60 * 60; // one hour
+	
+	// TODO think
+	WeatherDatabase weatherDatabase;
 	
 	// change UI - update weather forecast
 	private void updateForecastWeather(ArrayList<Map<String, Object>> data) {
@@ -83,13 +85,22 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
 		
 		// update "last updated" field
 		tv = (TextView)findViewById(R.id.textViewLastUpdated);
-		String lastUpd = weather.getLastUpdated();
-		tv.setText(lastUpd == null ? getResources().getString(R.string.neverupdated) : lastUpd);
+		tv.setText(getResources().getString(R.string.neverupdated));
+		if (curPosCity < cities.size()) {
+			int time = weatherDatabase.getUpdateTime(cities.get(curPosCity));
+			if (time != -1) {
+				String timeStr = weather.getLastUpdated(time);
+				tv.setText(timeStr);
+			}
+		}
 		
 		// city name
 		tv = (TextView)findViewById(R.id.textViewCityName);
-		if (curPosCity < cities.length) {
-			tv.setText(cities[curPosCity]);
+		if (curPosCity < cities.size()) {
+			tv.setText(cities.get(curPosCity));
+			int time = weatherDatabase.getUpdateTime(cities.get(curPosCity));
+			String timeStr = weather.getLastUpdated(time);
+			tv.setText(timeStr);
 		} else
 		{
 			tv.setText("");
@@ -97,52 +108,23 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
 	}
 	
 	
-	private void updateWeather() {
-		if (curPosCity < cities.length) {
-			WeatherDownloader task = new WeatherDownloader();
-			task.execute();
+	private void updateWeather(boolean needDownload) {
+		if (curPosCity < cities.size()) {
+			String city = cities.get(curPosCity);
+			int lastUpd = weatherDatabase.getUpdateTime(city);
+			int curTime = WeatherHelper.getUnixTime();
+			if (!needDownload && (curTime - lastUpd < updateTime)) { // обновлено меньше минуты назад
+				updateCurrentWeather(weatherDatabase.getCurrentWeather(city));
+				updateForecastWeather(weatherDatabase.getForecastWeather(city));
+			} else {
+				WeatherDownloader task = new WeatherDownloader(city);
+				task.execute();
+			}
 		}
-	}
-	
-	
-	private Set<String> readCitiesFromPreferences() {
-		SharedPreferences pref = getSharedPreferences("cities", MODE_PRIVATE);
-		Set<String> res = pref.getStringSet(ATTRIBUTE_NAME_CITIES, null);
-		return res;
-	}
-	
-	private void writeCitiesIntoPreferences(Set<String> set) {
-		SharedPreferences pref = getSharedPreferences("cities", MODE_PRIVATE);
-		Editor ed = pref.edit();
-		ed.putStringSet(ATTRIBUTE_NAME_CITIES, set);
-		ed.commit();
-		
-	}
-	
-	private String[] setOfStringToArray(Set<String> set) {
-		if (set == null) {
-			return new String[0];
-		}
-		String[] res = new String[set.size()];
-		int cnt = 0;
-		for (String s : set) {
-			res[cnt++] = s;
-		}
-		return res;
-	}
-	
-	private void addCity(String s) {
-		HashSet<String> set = (HashSet<String>) readCitiesFromPreferences();
-		if (set == null) {
-			set = new HashSet<String>(); 
-		}
-		set.add(s);
-		writeCitiesIntoPreferences(set);
 	}
 	
 	private void setUpSpinner() {
 		curPosCity = 0;
-		
 		Spinner spinner = (Spinner)findViewById(R.id.spinner1);
 		ArrayAdapter<String> ad = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, cities);
     	ad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -152,24 +134,35 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (data == null) return;
-		if (data.hasExtra("city")) {
-			addCity(data.getStringExtra("city"));
+		if (data != null && data.hasExtra("city")) {
+			//addCity(data.getStringExtra("city"));
+			weatherDatabase.addCity(data.getStringExtra("city"));
 		}
-		cities = setOfStringToArray(readCitiesFromPreferences());
+		cities = weatherDatabase.getCities();
 		setUpSpinner();
-		updateWeather();
+		if (cities.size() > 0) {
+			curPosCity = cities.size() - 1;
+		}
+		Spinner spinner = (Spinner)findViewById(R.id.spinner1);
+		spinner.setSelection(curPosCity);
+		updateWeather(false);
 	}
 	
 	public void onItemSelected(AdapterView<?> arg0, View arg1, int pos,
 			long arg3) {
 		if (curPosCity != pos) {
 			curPosCity = pos;
-			updateWeather();
+			updateWeather(false);
 		}
 	}
 
 	public void onNothingSelected(AdapterView<?> arg0) {
+	}
+	
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		weatherDatabase.close();
 	}
 	
     @Override
@@ -177,7 +170,7 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
    
-        WeatherDatabase weatherDatabase = new WeatherDatabase();
+        weatherDatabase = new WeatherDatabase(this);
         weatherDatabase.test();
         
         weather = new WeatherHelper();
@@ -194,13 +187,14 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
         addButton.setOnClickListener(this);
     
         // setup spinner
-        cities = setOfStringToArray(readCitiesFromPreferences());
-        if (cities.length == 0) {
+        cities = weatherDatabase.getCities();
+        
+        if (cities.size() == 0) {
         	Intent intent = new Intent(this, CitiesActivity.class);
     		startActivityForResult(intent, 0);
         } else {
         	setUpSpinner();
-            updateWeather();
+            updateWeather(false);
         }
     }
     
@@ -209,7 +203,7 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
     	case R.id.imageViewUpdate:
     		if (updateButtonIsActive) {
         		updateButtonIsActive = false;
-        		updateWeather();
+        		updateWeather(true);
     		}
     		break;
     	case R.id.imageViewAdd:
@@ -222,10 +216,15 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
     
     class WeatherDownloader extends AsyncTask<Void, Void, String> {
     	String urlData;
+    	String city;
+    	
+    	public WeatherDownloader(String city) {
+    		this.city = city;
+    	}
     	
     	@Override
     	protected void onPreExecute() {
-    		urlData = weather.getUrl(cities[curPosCity]);
+    		urlData = weather.getUrl(city);
     		
     		updateButtonIsActive = false;
     		
@@ -262,8 +261,13 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
 			
 			// change UI:
 			if (data != null) {
-				updateForecastWeather(weather.getForecastWeather(data));
-				updateCurrentWeather(weather.getCurrentWeather(data));
+				ArrayList<Map<String, Object>> data1 = weather.getForecastWeather(data);
+				weatherDatabase.updateForecastWeather(city, data1);
+				updateForecastWeather(data1);
+				
+				Map<String, String> data2 = weather.getCurrentWeather(data);
+				weatherDatabase.updateCurrentWeather(city, data2);
+				updateCurrentWeather(data2);
 			}
 			
 			Toast t = Toast.makeText(getApplicationContext(), "Weather downloaded!", Toast.LENGTH_SHORT);
@@ -298,8 +302,6 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
 			v.setImageBitmap(bm);
 		}
     }
-
-	
 
 	
 }

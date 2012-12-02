@@ -8,8 +8,6 @@ import java.net.URL;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
@@ -20,12 +18,14 @@ import android.widget.AdapterView.OnItemClickListener;
 public class CitiesActivity extends Activity implements OnClickListener {
 	ListView listView;
 	String[] cities;
-	
+	WeatherDatabase weatherDatabase = null;
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cities);
+        
+        weatherDatabase = new WeatherDatabase(this);
         
         Button bt = (Button)findViewById(R.id.button1);
         bt.setOnClickListener(this);
@@ -75,11 +75,8 @@ public class CitiesActivity extends Activity implements OnClickListener {
 			imm.hideSoftInputFromWindow(et.getWindowToken(), 0);
 			break;
 		case R.id.button2: // clear
-			SharedPreferences pref = getSharedPreferences("cities", MODE_PRIVATE);
-			Editor ed = pref.edit();
-			ed.remove("cities");
-			ed.commit();
-			setResult(RESULT_OK, new Intent());
+			weatherDatabase.clearTables();
+			
 			finish();
 			break;
 		}

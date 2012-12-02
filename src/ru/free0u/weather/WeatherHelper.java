@@ -17,11 +17,11 @@ public class WeatherHelper {
 	final String ATTRIBUTE_NAME_WIND = "wind";
 	final String ATTRIBUTE_NAME_URL_ICON = "url_icon";
 	
-	long lastUpdated = 0;
 	
-	private void updateTime() {
-		lastUpdated = System.currentTimeMillis();
+	public static int getUnixTime() {
+		return (int)(System.currentTimeMillis() / 1000L);
 	}
+	
 	
 	private String prettyTemp(String a) {
 		int t = Integer.parseInt(a);
@@ -63,11 +63,11 @@ public class WeatherHelper {
 		return url;
 	}
 	
-	public String getLastUpdated() {
-		if (lastUpdated == 0) {
+	public String getLastUpdated(int x) {
+		if (x == 0) {
 			return null;
 		}
-		Date a = new Date(lastUpdated);
+		Date a = new Date(x * 1000L);
 		
 		SimpleDateFormat ft = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
 		return ft.format(a);
@@ -75,8 +75,6 @@ public class WeatherHelper {
 	
 	// parse json in data
 	public Map<String, String> getCurrentWeather(String jString) {
-		updateTime();
-		
 		HashMap<String, String> m = new HashMap<String, String>();
 		
 		try {
@@ -137,6 +135,8 @@ public class WeatherHelper {
 		
 		return res;
 	}
+	
+
 
 	public String[] parseCities(String jString) {
 		String[] res = new String[0];
