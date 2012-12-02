@@ -24,7 +24,7 @@ import android.widget.*;
 import android.widget.AdapterView.OnItemSelectedListener;
 
 public class MainActivity extends Activity implements OnClickListener, OnItemSelectedListener {
-	Weather weather;
+	WeatherHelper weather;
 	ArrayList<Map<String, Object>> weatherListData;
 	boolean updateButtonIsActive = true;
 	LayoutInflater inflater;
@@ -119,15 +119,6 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
 		
 	}
 	
-	private void addCity(String s) {
-		HashSet<String> set = (HashSet<String>) readCitiesFromPreferences();
-		if (set == null) {
-			set = new HashSet<String>(); 
-		}
-		set.add(s);
-		writeCitiesIntoPreferences(set);
-	}
-	
 	private String[] setOfStringToArray(Set<String> set) {
 		if (set == null) {
 			return new String[0];
@@ -138,6 +129,15 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
 			res[cnt++] = s;
 		}
 		return res;
+	}
+	
+	private void addCity(String s) {
+		HashSet<String> set = (HashSet<String>) readCitiesFromPreferences();
+		if (set == null) {
+			set = new HashSet<String>(); 
+		}
+		set.add(s);
+		writeCitiesIntoPreferences(set);
 	}
 	
 	private void setUpSpinner() {
@@ -177,7 +177,7 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
    
-        weather = new Weather();
+        weather = new WeatherHelper();
         
         // add weather.xml view
         LinearLayout lin = (LinearLayout)findViewById(R.id.weatherLayout);

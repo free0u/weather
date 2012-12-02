@@ -87,10 +87,10 @@ public class CitiesActivity extends Activity implements OnClickListener {
 	
 	class CityDownloader extends AsyncTask<Void, Void, String> {
     	String urlData;
-    	Weather weather;
+    	WeatherHelper weather;
     	
     	public CityDownloader(String city) {
-    		weather = new Weather();
+    		weather = new WeatherHelper();
     		urlData = weather.getCityUrl(city);
     	}
     	
