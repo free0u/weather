@@ -177,6 +177,9 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
    
+        WeatherDatabase weatherDatabase = new WeatherDatabase();
+        weatherDatabase.test();
+        
         weather = new WeatherHelper();
         
         // add weather.xml view
