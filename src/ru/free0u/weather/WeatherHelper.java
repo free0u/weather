@@ -69,7 +69,7 @@ public class WeatherHelper {
 		}
 		Date a = new Date(x * 1000L);
 		
-		SimpleDateFormat ft = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss");
+		SimpleDateFormat ft = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 		return ft.format(a);
 	}
 	

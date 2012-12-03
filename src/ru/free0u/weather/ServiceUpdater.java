@@ -7,6 +7,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
+import android.util.Log;
 
 public class ServiceUpdater extends Service {
 	final static int NOTIFY_INTERVAL = 60 * 60 * 3; // 3 hours in sec
@@ -46,6 +47,7 @@ public class ServiceUpdater extends Service {
 	class TimeDisplayTimerTask extends TimerTask {
 		@Override
 		public void run() {
+			Log.i("db", "TimeDisplayTimerTask");
 			mHandler.post(new Runnable() {
 				@Override
 				public void run() {

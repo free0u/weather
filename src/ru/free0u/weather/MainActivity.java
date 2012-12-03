@@ -22,6 +22,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -128,9 +129,6 @@ public class MainActivity extends Activity implements OnClickListener,
 		tv = (TextView) findViewById(R.id.textViewCityName);
 		if (curPosCity < cities.size()) {
 			tv.setText(cities.get(curPosCity));
-			int time = weatherDatabase.getUpdateTime(cities.get(curPosCity));
-			String timeStr = weather.getLastUpdated(time);
-			tv.setText(timeStr);
 		} else {
 			tv.setText("");
 		}
@@ -246,12 +244,6 @@ public class MainActivity extends Activity implements OnClickListener,
 		intent.putExtra("time", time);
 		startService(intent);
 	}
-	
-	@Override
-	public void onDestroy() {
-		super.onDestroy();
-		weatherDatabase.close();
-	}
 
 	public void onClick(View v) {
 		switch (v.getId()) {
@@ -322,6 +314,7 @@ public class MainActivity extends Activity implements OnClickListener,
 				weatherDatabase.updateCurrentWeather(city,
 						weather.getCurrentWeather(data));
 				updateCurrentWeather(weatherDatabase.getCurrentWeather(city));
+				Log.i("db", "1update weahter " + city);
 			}
 		}
 	}
