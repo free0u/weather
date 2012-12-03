@@ -17,6 +17,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -52,13 +53,24 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
 			tv.setText((String)day.get(weather.ATTRIBUTE_NAME_DATE));
 			
 			tv = (TextView)v.findViewById(R.id.textTemp);
-			tv.setText((String)day.get(weather.ATTRIBUTE_NAME_TEMPERATURE));
+			String temp = (String)day.get(weather.ATTRIBUTE_NAME_TEMPERATURE);
+			while (temp.length() < 11) {
+				temp += " ";
+			}
+			tv.setText(temp);
 			
+			// icon
 			ImageView iv = (ImageView)v.findViewById(R.id.imageIconWeather);
 			iv.setImageBitmap(null);
-			ImageViewSetter task = new ImageViewSetter(iv, (String)day.get(weather.ATTRIBUTE_NAME_URL_ICON));
-			task.execute();
-			
+			if (Integer.parseInt((String)day.get("updated_icon")) == 0) { // need download
+				ImageViewSetter task = new ImageViewSetter(iv, (String)day.get(weather.ATTRIBUTE_NAME_URL_ICON));
+				task.execute();
+			} else { // get from database
+				byte[] pic = (byte[])day.get("icon");
+				ByteArrayInputStream stream = new ByteArrayInputStream(pic);
+				Bitmap bm = BitmapFactory.decodeStream(stream);
+				iv.setImageBitmap(bm);
+			}
 			lin.addView(v);
 			
 		}
@@ -310,6 +322,7 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
 				}
 				res = baf.toByteArray();
 		    } catch (Exception ignore) {
+		    	Log.i("pic", "Error: " + ignore.toString());
 		    }
 			return res;
 		}

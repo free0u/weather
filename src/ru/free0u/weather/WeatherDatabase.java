@@ -37,11 +37,11 @@ public class WeatherDatabase {
 	
 	void test() {
 		// ===
-		
+		//updateAll();
 		//clearTables();
 		Cursor c;
 		c = db.query("weather", null, null, null, null, null, null);
-		//logCursor(c);
+		logCursor(c);
 		
 		// ==
 		
@@ -147,8 +147,8 @@ public class WeatherDatabase {
 					HashMap<String, Object> m = new HashMap<String, Object>();
 					m.put(weather.ATTRIBUTE_NAME_DATE, c.getString(c.getColumnIndex("date")));
 					m.put(weather.ATTRIBUTE_NAME_TEMPERATURE, c.getString(c.getColumnIndex("temp")));
-					m.put(weather.ATTRIBUTE_NAME_URL_ICON, c.getString(c.getColumnIndex("temp")));
-					m.put("updated_icon", c.getInt(c.getColumnIndex("updated_icon")));
+					m.put(weather.ATTRIBUTE_NAME_URL_ICON, c.getString(c.getColumnIndex("url_icon")));
+					m.put("updated_icon", c.getString(c.getColumnIndex("updated_icon")));
 					m.put("icon", c.getBlob(c.getColumnIndex("icon")));
 					res.add(m);
 				} while (c.moveToNext());
@@ -233,12 +233,16 @@ public class WeatherDatabase {
 	        	  if (cn.equals("icon")) {
 	        		  byte[] a = c.getBlob(c.getColumnIndex(cn));
 	        		  data = "{";
+	        		  int cnt = 0;
 	        		  if (a != null) {
 	        			  for (int i = 0; i < a.length; ++i) {
 		        			  data += (a[i] + ", ");
-		        		  }
+		        			  cnt += a[i];
+	        			  }
 	        		  }
 	        		  data += "}";
+	        		  
+	        		  data = "{ " + cnt + " }";
 	        	  } else
 	        	  {
 	        		  data = c.getString(c.getColumnIndex(cn));
