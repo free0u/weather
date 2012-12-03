@@ -19,7 +19,7 @@
             android:layout_marginLeft="5dp"
             android:layout_marginRight="5dp"
             android:layout_weight="0.32" />
-
+
         <ImageView
             android:id="@+id/imageViewAdd"
             android:layout_width="wrap_content"
@@ -29,7 +29,7 @@
             android:maxHeight="35dp"
             android:maxWidth="35dp"
             android:src="@drawable/add" />
-
+
         <ImageView
             android:id="@+id/imageViewUpdate"
             android:layout_width="wrap_content"
@@ -38,9 +38,8 @@
             android:adjustViewBounds="true"
             android:maxHeight="35dp"
             android:src="@drawable/update" />
-
     </LinearLayout>
-
+
     <LinearLayout
         android:id="@+id/weatherLayout"
         android:layout_width="match_parent"

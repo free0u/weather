@@ -24,6 +24,8 @@
             </intent-filter>
         </activity>
         <activity android:name="CitiesActivity"></activity>
+        <activity android:name="ServiceSettingsActivity"></activity>
+        <service android:name="ServiceUpdater"/>
     </application>
 
 </manifest>

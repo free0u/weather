@@ -16,5 +16,11 @@
     <string name="find">Поиск</string>
     <string name="nothingfound">Ничего не найдено</string>
     <string name="clear">Удалить города из памяти</string>
+    <string name="start_upd">Start update</string>
+    <string name="stop_upd">Stop update</string>
+    <string name="city_name">city_name</string>
+    <string name="background_settings">Background settings</string>
+    <string name="eng_please">English please</string>
+    <string name="every_min">every minuts</string>
 
 </resources>

@@ -14,11 +14,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.os.AsyncTask;
-import android.util.Log;
-import android.widget.Toast;
 
 public class WeatherDatabase {
-	final String LOG_TAG = "db";
 	DBHelper dbHelper;
 	SQLiteDatabase db;
 	ContentValues cvCity, cvForecast;
@@ -33,18 +30,6 @@ public class WeatherDatabase {
 		cvCity= new ContentValues();
 		cvForecast = new ContentValues();
 		weather = new WeatherHelper();
-	}
-	
-	void test() {
-		// ===
-		//updateAll();
-		//clearTables();
-		Cursor c;
-		c = db.query("weather", null, null, null, null, null, null);
-		logCursor(c);
-		
-		// ==
-		
 	}
 	
 	public void close() {
@@ -174,7 +159,6 @@ public class WeatherDatabase {
 	}
 	
 	void setIcon(String url, byte[] pic) {
-		// TODO test
 		cvForecast.clear();
 		cvForecast.put("icon", pic);
 		cvForecast.put("updated_icon", "1");
@@ -194,12 +178,9 @@ public class WeatherDatabase {
 	
 	void addCity(String city) {
 		if (haveCity(city) == -1) {
-			Log.i(LOG_TAG, "dont have city " + city);
 			cvCity.put("title", city);
 			cvCity.put("last_upd", -1);
 			db.insert("cities", null, cvCity);
-		} else {
-			Log.i(LOG_TAG, "have city " + city);
 		}
 	}
 	
@@ -217,7 +198,6 @@ public class WeatherDatabase {
 	}
 	
 	void clearTables() {
-		Log.i(LOG_TAG, "clearTables");
 		db.delete("weather", null, null);
 		db.delete("cities", null, null);
 	}
@@ -251,15 +231,11 @@ public class WeatherDatabase {
 	            	
 	        	  str = str.concat(cn + " = " + data + "; ");
 	          }
-	          Log.i(LOG_TAG, str);
 	        } while (c.moveToNext());
 	      } else {
-	    	  Log.i(LOG_TAG, "!c.moveToFirst()");
 	      }
 	    } else {
-	    	Log.i(LOG_TAG, "Cursor is null");
 	    }
-	
 	}
 	
 	class DBHelper extends SQLiteOpenHelper {
@@ -269,9 +245,7 @@ public class WeatherDatabase {
 
 		@Override
 		public void onCreate(SQLiteDatabase db) {
-			Log.i(LOG_TAG, "onCreate()");
 			String q;
-			
 			q = "CREATE TABLE cities (id integer primary key autoincrement, title text, last_upd integer);";
 			db.execSQL(q);
 			q = "CREATE TABLE weather (" +
@@ -281,32 +255,14 @@ public class WeatherDatabase {
 					"temp text, " +
 					"pressure text, " + 
 					"wind text, " +
-					"url_icon text);";
+					"url_icon text, " +
+					"updated_icon text default \"0\", " +
+					"icon blob);";
 			db.execSQL(q);
 		}
 
 		@Override
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-			Log.i(LOG_TAG, "onUpgrade() " + oldVersion + " " + newVersion);
-			if (newVersion == 9) {
-				db.execSQL("drop table cities");
-				db.execSQL("drop table weather");
-				
-				String q;
-				q = "CREATE TABLE cities (id integer primary key autoincrement, title text, last_upd integer);";
-				db.execSQL(q);
-				q = "CREATE TABLE weather (" +
-						"id integer primary key autoincrement, " + 
-						"city_id integer, " + 
-						"date text, " +
-						"temp text, " +
-						"pressure text, " + 
-						"wind text, " +
-						"url_icon text, " +
-						"updated_icon text default \"0\", " +
-						"icon blob);";
-				db.execSQL(q);
-			}
 		}
 	}
 	
@@ -355,10 +311,6 @@ public class WeatherDatabase {
 				
 				Map<String, String> data2 = weather.getCurrentWeather(data);
 				updateCurrentWeather(city, data2);
-				
-				// TODO delete toast
-				Toast t = Toast.makeText(context, "Updated all", Toast.LENGTH_SHORT);
-	    		t.show();
 			}
 		}
     }

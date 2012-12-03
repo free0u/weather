@@ -7,50 +7,47 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
-
+
         <EditText
             android:id="@+id/editTextFind"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:ems="10"
-            android:hint="English please" >
+            android:hint="@string/eng_please" >
 
             <requestFocus />
         </EditText>
-
+
         <Button
             android:id="@+id/button1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/find" />
-
     </LinearLayout>
-
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
-
+
         <Button
             android:id="@+id/button2"
             style="?android:attr/buttonStyleSmall"
             android:layout_width="170dp"
             android:layout_height="wrap_content"
             android:text="@string/clear" />
-
+
         <TextView
             android:id="@+id/textViewStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
-
     </LinearLayout>
-
+
     <ListView
         android:id="@+id/listViewCities"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
-
     </ListView>
 
 </LinearLayout>
