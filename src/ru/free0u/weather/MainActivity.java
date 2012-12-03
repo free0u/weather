@@ -1,12 +1,15 @@
 package ru.free0u.weather;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Map;
+
+import org.apache.http.util.ByteArrayBuffer;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -53,8 +56,8 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
 			
 			ImageView iv = (ImageView)v.findViewById(R.id.imageIconWeather);
 			iv.setImageBitmap(null);
-			ImageViewSetter task = new ImageViewSetter(iv);
-			task.execute((String)day.get(weather.ATTRIBUTE_NAME_URL_ICON));
+			ImageViewSetter task = new ImageViewSetter(iv, (String)day.get(weather.ATTRIBUTE_NAME_URL_ICON));
+			task.execute();
 			
 			lin.addView(v);
 			
@@ -63,28 +66,33 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
 	}
 
 	// change UI - update current weather
-	private void updateCurrentWeather(Map<String, String> data) {
+	private void updateCurrentWeather(Map<String, Object> data) {
 		// icon
 		ImageView icon = (ImageView)findViewById(R.id.imageWeatherNow);
 		icon.setImageBitmap(null);
-		if (Integer.parseInt(data.get("updated_icon")) == 0) { // need download
-			ImageViewSetter task = new ImageViewSetter(icon);
-			task.execute(data.get(weather.ATTRIBUTE_NAME_URL_ICON));
+		if (Integer.parseInt((String)data.get("updated_icon")) == 0) { // need download
+			ImageViewSetter task = new ImageViewSetter(icon, (String)data.get(weather.ATTRIBUTE_NAME_URL_ICON));
+			task.execute();
+		} else { // get from database
+			byte[] pic = (byte[])data.get("icon");
+			ByteArrayInputStream stream = new ByteArrayInputStream(pic);
+			Bitmap bm = BitmapFactory.decodeStream(stream);
+			icon.setImageBitmap(bm);
 		}
 		
 		
 		// temperature
 		TextView tv = (TextView)findViewById(R.id.textViewTempNow);
-		tv.setText(data.get(weather.ATTRIBUTE_NAME_TEMPERATURE) + " " +
+		tv.setText((String)data.get(weather.ATTRIBUTE_NAME_TEMPERATURE) + " " +
 				getResources().getString(R.string.celsius));
 		
 		// wind
 		tv = (TextView)findViewById(R.id.textViewWindNow);
-		tv.setText(data.get(weather.ATTRIBUTE_NAME_WIND));
+		tv.setText((String)data.get(weather.ATTRIBUTE_NAME_WIND));
 		
 		// pressure
 		tv = (TextView)findViewById(R.id.TextViewPressureNow);
-		tv.setText(data.get(weather.ATTRIBUTE_NAME_PRESSURE));
+		tv.setText((String)data.get(weather.ATTRIBUTE_NAME_PRESSURE));
 		
 		// update "last updated" field
 		tv = (TextView)findViewById(R.id.textViewLastUpdated);
@@ -279,28 +287,39 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
     // usage: 
     // ctor ImageViewSetter(ImageView v)
     // execute(url)
-    class ImageViewSetter extends AsyncTask<String, Void, Bitmap> {
+    class ImageViewSetter extends AsyncTask<Void, Void, byte[]> {
     	ImageView v;
-    	
-    	public ImageViewSetter(ImageView v) {
+    	String url;
+    	public ImageViewSetter(ImageView v, String url) {
     		this.v = v;
+    		this.url = url;
 		}
     	
 		@Override
-		protected Bitmap doInBackground(String... arg0) {
-			Bitmap bm = null;
+		protected byte[] doInBackground(Void... arg0) {
+			byte[] res = new byte[0];
 			try {
-		        URLConnection conn = new URL(arg0[0]).openConnection();
-		        conn.connect();
-		        bm = BitmapFactory.decodeStream(conn.getInputStream());
+				URL imageUrl = new URL(url);
+				URLConnection ucon = imageUrl.openConnection();
+				InputStream is = ucon.getInputStream();
+				BufferedInputStream bis = new BufferedInputStream(is);
+				ByteArrayBuffer baf = new ByteArrayBuffer(500);
+				int current = 0;
+				while ((current = bis.read()) != -1) {
+				        baf.append((byte) current);
+				}
+				res = baf.toByteArray();
 		    } catch (Exception ignore) {
 		    }
-			return bm;
+			return res;
 		}
     	
 		@Override
-		protected void onPostExecute(Bitmap bm) {
+		protected void onPostExecute(byte[] pic) {
+			ByteArrayInputStream stream = new ByteArrayInputStream(pic);
+			Bitmap bm = BitmapFactory.decodeStream(stream);
 			v.setImageBitmap(bm);
+			weatherDatabase.setIcon(url, pic);
 		}
     }
 
