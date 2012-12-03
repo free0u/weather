@@ -36,7 +36,7 @@ public class WeatherDatabase {
 	}
 	
 	void test() {
-		Log.i(LOG_TAG, "void test()");
+		//Log.i(LOG_TAG, "void test()");
 
 		
 		//clearTables();
@@ -53,8 +53,8 @@ public class WeatherDatabase {
 		//logCursor(c);
 		
 		//c = db.query("cities inner join weather on cities.id = weather.city_id", null, null, null, null, null, null);
-		c = db.query("cities", null, null, null, null, null, null);
-		//logCursor(c);
+		c = db.query("weather", null, null, null, null, null, null);
+		logCursor(c);
 		
 		// ==
 		
@@ -67,7 +67,8 @@ public class WeatherDatabase {
 	public int getUpdateTime(String city) {
 		Cursor c = db.query("cities", null, "title = ?", new String[] {city}, null, null, null);
 		if (c.moveToFirst()) {
-			return c.getInt(c.getColumnIndex("last_upd"));
+			int res = c.getInt(c.getColumnIndex("last_upd"));
+			return res;
 		} else
 		{
 			return -1;
@@ -91,6 +92,7 @@ public class WeatherDatabase {
 		cvForecast.put("pressure", data.get(weather.ATTRIBUTE_NAME_PRESSURE));
 		cvForecast.put("wind", data.get(weather.ATTRIBUTE_NAME_WIND));
 		cvForecast.put("url_icon", data.get(weather.ATTRIBUTE_NAME_URL_ICON));
+		cvForecast.put("updated_icon", 0);
 		
 		db.delete("weather", "city_id = ? and date = ?", new String[] {Integer.toString(id), "0"});
 		db.insert("weather", null, cvForecast);
@@ -109,6 +111,7 @@ public class WeatherDatabase {
 			res.put(weather.ATTRIBUTE_NAME_PRESSURE, c.getString(c.getColumnIndex("pressure")));
 			res.put(weather.ATTRIBUTE_NAME_WIND, c.getString(c.getColumnIndex("wind")));
 			res.put(weather.ATTRIBUTE_NAME_URL_ICON, c.getString(c.getColumnIndex("url_icon")));
+			res.put("updated_icon", c.getString(c.getColumnIndex("updated_icon")));
 			return res;
 		} else {
 			return null;
@@ -137,6 +140,7 @@ public class WeatherDatabase {
 			cvForecast.put("pressure", "0"); // stub
 			cvForecast.put("wind", "0"); // stub
 			cvForecast.put("url_icon", (String)day.get(weather.ATTRIBUTE_NAME_URL_ICON));
+			cvForecast.put("updated_icon", 0);
 			
 			db.insert("weather", null, cvForecast);
 		}
@@ -157,6 +161,7 @@ public class WeatherDatabase {
 					m.put(weather.ATTRIBUTE_NAME_DATE, c.getString(c.getColumnIndex("date")));
 					m.put(weather.ATTRIBUTE_NAME_TEMPERATURE, c.getString(c.getColumnIndex("temp")));
 					m.put(weather.ATTRIBUTE_NAME_URL_ICON, c.getString(c.getColumnIndex("temp")));
+					m.put("updated_icon", c.getInt(c.getColumnIndex("updated_icon")));
 					res.add(m);
 				} while (c.moveToNext());
 			}
@@ -244,7 +249,7 @@ public class WeatherDatabase {
 	
 	class DBHelper extends SQLiteOpenHelper {
 		public DBHelper(Context context) {
-			super(context, "weather_db", null, 5);
+			super(context, "weather_db", null, 9);
 		}
 
 		@Override
@@ -268,15 +273,23 @@ public class WeatherDatabase {
 		@Override
 		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 			Log.i(LOG_TAG, "onUpgrade() " + oldVersion + " " + newVersion);
-			if (newVersion == 5) {
-				String q = "CREATE TABLE weather (" +
+			if (newVersion == 9) {
+				db.execSQL("drop table cities");
+				db.execSQL("drop table weather");
+				
+				String q;
+				q = "CREATE TABLE cities (id integer primary key autoincrement, title text, last_upd integer);";
+				db.execSQL(q);
+				q = "CREATE TABLE weather (" +
 						"id integer primary key autoincrement, " + 
 						"city_id integer, " + 
 						"date text, " +
 						"temp text, " +
 						"pressure text, " + 
 						"wind text, " +
-						"url_icon text);";
+						"url_icon text, " +
+						"updated_icon text default \"0\", " +
+						"icon blob);";
 				db.execSQL(q);
 			}
 		}

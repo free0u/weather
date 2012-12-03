@@ -67,8 +67,11 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
 		// icon
 		ImageView icon = (ImageView)findViewById(R.id.imageWeatherNow);
 		icon.setImageBitmap(null);
-		ImageViewSetter task = new ImageViewSetter(icon);
-		task.execute(data.get(weather.ATTRIBUTE_NAME_URL_ICON));
+		if (Integer.parseInt(data.get("updated_icon")) == 0) { // need download
+			ImageViewSetter task = new ImageViewSetter(icon);
+			task.execute(data.get(weather.ATTRIBUTE_NAME_URL_ICON));
+		}
+		
 		
 		// temperature
 		TextView tv = (TextView)findViewById(R.id.textViewTempNow);
@@ -261,13 +264,11 @@ public class MainActivity extends Activity implements OnClickListener, OnItemSel
 			
 			// change UI:
 			if (data != null) {
-				ArrayList<Map<String, Object>> data1 = weather.getForecastWeather(data);
-				weatherDatabase.updateForecastWeather(city, data1);
-				updateForecastWeather(data1);
+				weatherDatabase.updateForecastWeather(city, weather.getForecastWeather(data));
+				updateForecastWeather(weatherDatabase.getForecastWeather(city));
 				
-				Map<String, String> data2 = weather.getCurrentWeather(data);
-				weatherDatabase.updateCurrentWeather(city, data2);
-				updateCurrentWeather(data2);
+				weatherDatabase.updateCurrentWeather(city, weather.getCurrentWeather(data));
+				updateCurrentWeather(weatherDatabase.getCurrentWeather(city));
 			}
 			
 			Toast t = Toast.makeText(getApplicationContext(), "Weather downloaded!", Toast.LENGTH_SHORT);
