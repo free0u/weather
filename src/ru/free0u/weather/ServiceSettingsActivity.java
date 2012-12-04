@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -17,10 +18,8 @@ public class ServiceSettingsActivity extends Activity implements OnClickListener
 	boolean isUpdating = false;
 	SharedPreferences sPref;
 	
-	void startServiceUpdate(int time) { // time in sec
-		Intent intent = new Intent(this, ServiceUpdater.class);
-		intent.putExtra("time", time);
-		startService(intent);
+	void startServiceUpdate() {
+		startService(new Intent(this, ServiceUpdater.class));
 	}
 	
 	void stopServiceUpdate() {
@@ -42,12 +41,17 @@ public class ServiceSettingsActivity extends Activity implements OnClickListener
 			EditText et = (EditText)findViewById(R.id.editTextUpdateInterval);
 			String timeStr = et.getText().toString();
 			int time = Integer.parseInt(timeStr) * 60;
-			saveIntInPref(time);
-			startServiceUpdate(time);
+			
+			ServiceUpdater.updateInterval = time;
+			startServiceUpdate();
+			
 			isUpdating = !isUpdating;
 			setUpButtons();
 			break;
 		case R.id.buttonStopUpd: // stop
+			
+			Log.i("db", "stop button. updateInterval: " + ServiceUpdater.updateInterval);
+			
 			stopServiceUpdate();
 			isUpdating = !isUpdating;
 			setUpButtons();
@@ -65,17 +69,6 @@ public class ServiceSettingsActivity extends Activity implements OnClickListener
 		return false;
 	}
 	
-	private void saveIntInPref(int x) {
-		sPref = getSharedPreferences("MyPref", MODE_PRIVATE);
-	    Editor ed = sPref.edit();
-	    ed.putInt("myint", x);
-	    ed.commit();
-	}
-	private int loadIntFromPref() {
-		sPref = getSharedPreferences("MyPref", MODE_PRIVATE);
-	    return sPref.getInt("myint", 10);
-	}
-	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -89,7 +82,7 @@ public class ServiceSettingsActivity extends Activity implements OnClickListener
         // test service
         isUpdating = isMyServiceRunning();
         if (isUpdating) {
-        	int x = loadIntFromPref();
+        	int x = ServiceUpdater.updateInterval;
         	EditText et = (EditText)findViewById(R.id.editTextUpdateInterval);
         	et.setText(String.valueOf(x / 60));
         }

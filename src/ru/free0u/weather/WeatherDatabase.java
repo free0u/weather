@@ -357,8 +357,6 @@ public class WeatherDatabase {
 				
 				Map<String, String> data2 = weather.getCurrentWeather(data);
 				updateCurrentWeather(city, data2);
-				
-				Log.i("db", "2update weahter " + city);
 			}
 		}
     }

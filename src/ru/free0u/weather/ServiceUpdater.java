@@ -12,6 +12,8 @@ import android.util.Log;
 public class ServiceUpdater extends Service {
 	final static int NOTIFY_INTERVAL = 60 * 60 * 3; // 3 hours in sec
 
+	public static int updateInterval = NOTIFY_INTERVAL;
+	
 	WeatherDatabase wd;
 	private Handler mHandler = new Handler();
 	private Timer mTimer = null;
@@ -26,32 +28,31 @@ public class ServiceUpdater extends Service {
 		if (mTimer != null) {
 			mTimer.cancel();
 		}
+		Log.i("db", "Service down!");
 		super.onDestroy();
 	}
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		wd = new WeatherDatabase(getApplicationContext());
-		int time = intent.getIntExtra("time", NOTIFY_INTERVAL); // sec
-		
 		if(mTimer != null) {
 			mTimer.cancel();
 		} else {
 			mTimer = new Timer();
 		}
-		mTimer.scheduleAtFixedRate(new TimeDisplayTimerTask(), 0, time * 1000L);
-		
-		return super.onStartCommand(intent, flags, startId);
+		mTimer.scheduleAtFixedRate(new TimeDisplayTimerTask(), 0, updateInterval * 1000L);
+		Log.i("db", "Timer run. Time: " + updateInterval);
+		return START_STICKY;
 	}
 
 	class TimeDisplayTimerTask extends TimerTask {
 		@Override
 		public void run() {
-			Log.i("db", "TimeDisplayTimerTask");
 			mHandler.post(new Runnable() {
 				@Override
 				public void run() {
 					wd.updateAll();
+					Log.i("db", "updating weather");
 				}
 			});
 		}

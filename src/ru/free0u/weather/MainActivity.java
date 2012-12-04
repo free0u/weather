@@ -235,14 +235,9 @@ public class MainActivity extends Activity implements OnClickListener,
 	}
 	
 	void startServiceUpdate(int time) { // time in sec
-		SharedPreferences sPref = getSharedPreferences("MyPref", MODE_PRIVATE);
-	    Editor ed = sPref.edit();
-	    ed.putInt("myint", time);
-	    ed.commit();
-		
-		Intent intent = new Intent(this, ServiceUpdater.class);
-		intent.putExtra("time", time);
-		startService(intent);
+	    Log.i("db", "start service from main");
+		ServiceUpdater.updateInterval = time;
+		startService(new Intent(this, ServiceUpdater.class));
 	}
 
 	public void onClick(View v) {
