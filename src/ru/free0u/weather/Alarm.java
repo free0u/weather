@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.PowerManager;
+import android.util.Log;
 
 public class Alarm extends BroadcastReceiver 
 {    
@@ -17,22 +18,25 @@ public class Alarm extends BroadcastReceiver
          wl.acquire();
 
          // Put here YOUR code.
+         Log.i("db", "onReceive()");
          WeatherDatabase wd = new WeatherDatabase(context);
          wd.updateAll();
          
          wl.release();
      }
 
- public void setAlarm(Context context, int time)
- {
-     AlarmManager am = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-     Intent i = new Intent(context, Alarm.class);
-     PendingIntent pi = PendingIntent.getBroadcast(context, 0, i, 0);
-     am.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 1000L * time, pi); // Millisec * Second * Minute
-     }
+	 public void setAlarm(Context context, int time)
+	 {
+		 Log.i("db", "setAlarm(). time: " + time);
+	     AlarmManager am = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+	     Intent i = new Intent(context, Alarm.class);
+	     PendingIntent pi = PendingIntent.getBroadcast(context, 0, i, 0);
+	     am.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 1000L * time, pi); // Millisec * Second * Minute
+	     }
 
      public void cancelAlarm(Context context)
      {
+    	 Log.i("db", "cancelAlarm()");
          Intent intent = new Intent(context, Alarm.class);
          PendingIntent sender = PendingIntent.getBroadcast(context, 0, intent, 0);
          AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);

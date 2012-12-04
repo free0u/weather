@@ -310,6 +310,7 @@ public class MainActivity extends Activity implements OnClickListener,
 
 			// change UI:
 			if (data != null) {
+				Log.i("db", "main.onPostExecute(). updateWeather()");
 				weatherDatabase.updateForecastWeather(city,
 						weather.getForecastWeather(data));
 				updateForecastWeather(weatherDatabase.getForecastWeather(city));
@@ -317,7 +318,6 @@ public class MainActivity extends Activity implements OnClickListener,
 				weatherDatabase.updateCurrentWeather(city,
 						weather.getCurrentWeather(data));
 				updateCurrentWeather(weatherDatabase.getCurrentWeather(city));
-				Log.i("db", "1update weahter " + city);
 			}
 		}
 	}

@@ -22,7 +22,7 @@ public class ServiceUpdater extends Service {
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Log.i("db", "onStartCommand. id = " + startId + " time: " + updateInterval);
+		Log.i("db", "Service.onStartCommand(). id = " + startId + " time: " + updateInterval);
 		if (startId == 1) {
 			alarm.setAlarm(getApplicationContext(), updateInterval);
 			return START_STICKY;

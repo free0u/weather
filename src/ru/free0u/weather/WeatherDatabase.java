@@ -352,6 +352,7 @@ public class WeatherDatabase {
 		protected void onPostExecute(String data) {
 			// update db
 			if (data != null) {
+				Log.i("db", "wd.onPostExecute(). updateWeather()");
 				ArrayList<Map<String, Object>> data1 = weather.getForecastWeather(data);
 				updateForecastWeather(city, data1);
 				
