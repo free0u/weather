@@ -29,8 +29,10 @@ public class ServiceSettingsActivity extends Activity implements OnClickListener
 	void setUpButtons() {
 		Button buttonStart = (Button)findViewById(R.id.buttonStartUpd);
         Button buttonStop = (Button)findViewById(R.id.buttonStopUpd);
+        EditText et = (EditText)findViewById(R.id.editTextUpdateInterval);
         
         buttonStart.setEnabled(!isUpdating);
+        et.setEnabled(!isUpdating);
         buttonStop.setEnabled(isUpdating);
 	}
 	
@@ -79,15 +81,10 @@ public class ServiceSettingsActivity extends Activity implements OnClickListener
         Button buttonStop = (Button)findViewById(R.id.buttonStopUpd);
         buttonStart.setOnClickListener(this);
         buttonStop.setOnClickListener(this);
-        
-        // test service
-        isUpdating = isMyServiceRunning();
-        if (isUpdating) {
-        	int x = ServiceUpdater.updateInterval;
-        	EditText et = (EditText)findViewById(R.id.editTextUpdateInterval);
-        	et.setText(String.valueOf(x / 60));
-        }
-        
-        setUpButtons();
+        EditText et = (EditText)findViewById(R.id.editTextUpdateInterval);
+    	et.setText("");
+    	
+    	isUpdating = isMyServiceRunning();
+    	setUpButtons();
 	}
 }

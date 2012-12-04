@@ -21,6 +21,6 @@
     <string name="city_name">city_name</string>
     <string name="background_settings">Background settings</string>
     <string name="eng_please">English please</string>
-    <string name="every_min">every minuts</string>
+    <string name="every_min">(every N minuts)</string>
 
 </resources>
