@@ -139,13 +139,21 @@ public class MainActivity extends Activity implements OnClickListener,
 			String city = cities.get(curPosCity);
 			int lastUpd = weatherDatabase.getUpdateTime(city);
 			int curTime = WeatherHelper.getUnixTime();
-			if (!needDownload && (curTime - lastUpd < updateTime)) {
-				updateCurrentWeather(weatherDatabase.getCurrentWeather(city));
-				updateForecastWeather(weatherDatabase.getForecastWeather(city));
-			} else {
+			
+			if (needDownload) {
 				WeatherDownloader task = new WeatherDownloader(city);
 				task.execute();
+			} else
+			{
+				if (curTime - lastUpd < updateTime) {
+					updateCurrentWeather(weatherDatabase.getCurrentWeather(city));
+					updateForecastWeather(weatherDatabase.getForecastWeather(city));
+				} else {
+					WeatherDownloader task = new WeatherDownloader(city);
+					task.execute();
+				}
 			}
+			
 		}
 	}
 
@@ -220,7 +228,7 @@ public class MainActivity extends Activity implements OnClickListener,
 		}
 		
 		if (!isMyServiceRunning()) {
-			startServiceUpdate(ServiceUpdater.NOTIFY_INTERVAL);
+			//startServiceUpdate(ServiceUpdater.NOTIFY_INTERVAL);
 		}
 	}
 

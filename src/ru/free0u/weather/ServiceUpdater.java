@@ -4,6 +4,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
@@ -11,50 +12,29 @@ import android.util.Log;
 
 public class ServiceUpdater extends Service {
 	final static int NOTIFY_INTERVAL = 60 * 60 * 3; // 3 hours in sec
-
 	public static int updateInterval = NOTIFY_INTERVAL;
+	Alarm alarm = new Alarm();
 	
-	WeatherDatabase wd;
-	private Handler mHandler = new Handler();
-	private Timer mTimer = null;
-
 	@Override
 	public IBinder onBind(Intent intent) {
 		return null;
 	}
-
-	@Override
-	public void onDestroy() {
-		if (mTimer != null) {
-			mTimer.cancel();
-		}
-		Log.i("db", "Service down!");
-		super.onDestroy();
-	}
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		wd = new WeatherDatabase(getApplicationContext());
-		if(mTimer != null) {
-			mTimer.cancel();
+		Log.i("db", "onStartCommand. id = " + startId + " time: " + updateInterval);
+		if (startId == 1) {
+			alarm.setAlarm(getApplicationContext(), updateInterval);
+			return START_STICKY;
 		} else {
-			mTimer = new Timer();
-		}
-		mTimer.scheduleAtFixedRate(new TimeDisplayTimerTask(), 0, updateInterval * 1000L);
-		Log.i("db", "Timer run. Time: " + updateInterval);
-		return START_STICKY;
-	}
-
-	class TimeDisplayTimerTask extends TimerTask {
-		@Override
-		public void run() {
-			mHandler.post(new Runnable() {
-				@Override
-				public void run() {
-					wd.updateAll();
-					Log.i("db", "updating weather");
-				}
-			});
+			return START_NOT_STICKY;
 		}
 	}
+	
+	@Override
+	public void onDestroy() {
+		Log.i("db", "Destroy service");
+		alarm.cancelAlarm(getApplicationContext());
+	}
+	
 }

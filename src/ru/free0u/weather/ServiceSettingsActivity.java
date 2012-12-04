@@ -40,6 +40,7 @@ public class ServiceSettingsActivity extends Activity implements OnClickListener
 		case R.id.buttonStartUpd: // start
 			EditText et = (EditText)findViewById(R.id.editTextUpdateInterval);
 			String timeStr = et.getText().toString();
+			// TODO int time = Integer.parseInt(timeStr) * 60;
 			int time = Integer.parseInt(timeStr) * 60;
 			
 			ServiceUpdater.updateInterval = time;
