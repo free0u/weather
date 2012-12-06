@@ -28,6 +28,7 @@
         <activity android:name="ServiceSettingsActivity"></activity>
         <service android:name="ServiceUpdater"/>
         <receiver android:process=":remote" android:name="Alarm"></receiver>
+        <provider android:name="WeatherContentProvider" android:authorities="ru.free0u.weather.provider"></provider>
     </application>
 
 </manifest>

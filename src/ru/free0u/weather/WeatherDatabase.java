@@ -13,11 +13,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
 public class WeatherDatabase {
-	DBHelper dbHelper;
 	ContentValues cvCity, cvForecast;
 	Context context;
 	WeatherHelper weather;
@@ -32,9 +32,8 @@ public class WeatherDatabase {
 	}
 	
 	public int getUpdateTime(String city) {
-		dbHelper = new DBHelper(context);
-		SQLiteDatabase db = dbHelper.getWritableDatabase();
-		Cursor c = db.query("cities", null, "title = ?", new String[] {city}, null, null, null);
+		Uri uri = Uri.withAppendedPath(WeatherContentProvider.CONTENT_CITY_URI, city);
+		Cursor c = context.getContentResolver().query(uri, null, null, null, null);
 		int res;
 		if (c.moveToFirst()) {
 			res = c.getInt(c.getColumnIndex("last_upd"));
@@ -42,13 +41,10 @@ public class WeatherDatabase {
 		{
 			res =  -1;
 		}
-		dbHelper.close();
 		return res;
 	}
 	
 	void updateCurrentWeather(String city, Map<String, String> data) {
-		dbHelper = new DBHelper(context);
-		SQLiteDatabase db = dbHelper.getWritableDatabase();
 		
 		int id = haveCity(city);
 		if (id == -1) {
@@ -56,9 +52,9 @@ public class WeatherDatabase {
 			id = haveCity(city);
 		}
 		
-		cvCity.put("title", city);
 		cvCity.put("last_upd", WeatherHelper.getUnixTime());
-		db.update("cities", cvCity, "id = ?", new String[] {Integer.toString(id)});
+		Uri uri = Uri.withAppendedPath(WeatherContentProvider.CONTENT_CITY_URI, city);
+		context.getContentResolver().update(uri, cvCity, null, null);
 		
 		cvForecast.put("city_id", id);
 		cvForecast.put("date", "0");
@@ -68,20 +64,18 @@ public class WeatherDatabase {
 		cvForecast.put("url_icon", data.get(weather.ATTRIBUTE_NAME_URL_ICON));
 		cvForecast.put("updated_icon", 0);
 		
-		db.delete("weather", "city_id = ? and date = ?", new String[] {Integer.toString(id), "0"});
-		db.insert("weather", null, cvForecast);
+		context.getContentResolver().delete(WeatherContentProvider.CONTENT_WEATHER_URI, 
+				"city_id = ? and date = ?", new String[] {Integer.toString(id), "0"});
 		
-		dbHelper.close();
+		context.getContentResolver().insert(WeatherContentProvider.CONTENT_WEATHER_URI, cvForecast);
 	}
 	
 	Map<String, Object> getCurrentWeather(String city) {
 		Map<String, Object> res = new HashMap<String, Object>();
 		int id = haveCity(city);
-		dbHelper = new DBHelper(context);
-		SQLiteDatabase db = dbHelper.getWritableDatabase();
 		if (id != -1) {
-			Cursor c = db.query("weather", null, "city_id = ? and date = ?", new String[] {Integer.toString(id), "0"}, 
-					null, null, null);
+			Cursor c = context.getContentResolver().query(WeatherContentProvider.CONTENT_WEATHER_URI, 
+					null, "city_id = ? and date = ?", new String[] {Integer.toString(id), "0"}, null);
 			if (!c.moveToFirst()) {
 				res = null;
 			} else {
@@ -95,7 +89,6 @@ public class WeatherDatabase {
 		} else {
 			return null;
 		}
-		dbHelper.close();
 		return res;
 	}
 	
@@ -105,15 +98,14 @@ public class WeatherDatabase {
 			addCity(city);
 			id = haveCity(city);
 		}
-		dbHelper = new DBHelper(context);
-		SQLiteDatabase db = dbHelper.getWritableDatabase();
-		
-		cvCity.put("title", city);
 		cvCity.put("last_upd", WeatherHelper.getUnixTime());
+		Uri uri = Uri.withAppendedPath(WeatherContentProvider.CONTENT_CITY_URI, city);
+		context.getContentResolver().update(uri, cvCity, null, null);
 		
-		db.update("cities", cvCity, "id = ?", new String[] {Integer.toString(id)});
 		
-		db.delete("weather", "city_id = ? and date != ?", new String[] {Integer.toString(id), "0"});
+		context.getContentResolver().delete(WeatherContentProvider.CONTENT_WEATHER_URI, 
+				"city_id = ? and date != ?", new String[] {Integer.toString(id), "0"});
+		
 		for (int i = 0; i < data.size(); ++i) {
 			Map<String, Object> day = data.get(i);
 			
@@ -124,9 +116,8 @@ public class WeatherDatabase {
 			cvForecast.put("wind", "0"); // stub
 			cvForecast.put("url_icon", (String)day.get(weather.ATTRIBUTE_NAME_URL_ICON));
 			cvForecast.put("updated_icon", 0);
-			db.insert("weather", null, cvForecast);
+			context.getContentResolver().insert(WeatherContentProvider.CONTENT_WEATHER_URI, cvForecast);
 		}
-		dbHelper.close();
 	}
 	
 	ArrayList<Map<String, Object>> getForecastWeather(String city) {
@@ -134,13 +125,9 @@ public class WeatherDatabase {
 		
 		int id = haveCity(city);
 		
-		dbHelper = new DBHelper(context);
-		SQLiteDatabase db = dbHelper.getWritableDatabase();
-		
 		if (id != -1) {
-			Cursor c = db.query("weather", null, "city_id = ? and date != ?", new String[] {Integer.toString(id), "0"}, 
-					null, null, null);
-			
+			Cursor c = context.getContentResolver().query(WeatherContentProvider.CONTENT_WEATHER_URI, 
+					null, "city_id = ? and date != ?", new String[] {Integer.toString(id), "0"}, null);
 			if (c == null) {
 				res = null;
 			} else {
@@ -159,16 +146,13 @@ public class WeatherDatabase {
 		} else {
 			res =  null;
 		}
-		dbHelper.close();
 		return res;
 	}
 	
 	
 	void updateAll() {
-		dbHelper = new DBHelper(context);
-		SQLiteDatabase db = dbHelper.getWritableDatabase();
-		Cursor c = db.query("cities", null, null, null, null, null, null);
-		
+		//Cursor c = db.query("cities", null, null, null, null, null, null);
+		Cursor c = context.getContentResolver().query(WeatherContentProvider.CONTENT_CITY_URI, null, null, null, null);
 		if (c == null) return;
 		if (c.moveToFirst()) {
 			do {
@@ -177,54 +161,42 @@ public class WeatherDatabase {
 				task.execute();
 			} while (c.moveToNext());
 		}
-		dbHelper.close();
 	}
 	
 	void setIcon(String url, byte[] pic) {
-		dbHelper = new DBHelper(context);
-		SQLiteDatabase db = dbHelper.getWritableDatabase();
-		
 		cvForecast.clear();
 		cvForecast.put("icon", pic);
 		cvForecast.put("updated_icon", "1");
-		db.update("weather", cvForecast, "url_icon = ? and updated_icon = ?", new String[] {url, "0"});
-		dbHelper.close();
+		context.getContentResolver().update(WeatherContentProvider.CONTENT_WEATHER_URI, cvForecast, 
+				"url_icon = ? and updated_icon = ?", new String[] {url, "0"});
 	}
 	
 	// return id
 	int haveCity(String city) {
-		dbHelper = new DBHelper(context);
-		SQLiteDatabase db = dbHelper.getWritableDatabase();
 		int res;
-		Cursor c = db.query("cities", null, "title = ?", new String[] {city}, null, null, null);
+		Uri uri = Uri.withAppendedPath(WeatherContentProvider.CONTENT_CITY_URI, city);
+		Cursor c = context.getContentResolver().query(uri, null, null, null, null);
 		if (c.moveToFirst()) {
 			res = c.getInt(c.getColumnIndex("id"));
 		} else
 		{
 			res = -1;
 		}
-		dbHelper.close();
 		return res;
+		
 	}
 	
 	void addCity(String city) {
 		if (haveCity(city) == -1) {
-			dbHelper = new DBHelper(context);
-			SQLiteDatabase db = dbHelper.getWritableDatabase();
-			
 			cvCity.put("title", city);
 			cvCity.put("last_upd", -1);
-			db.insert("cities", null, cvCity);
-			dbHelper.close();
+			context.getContentResolver().insert(WeatherContentProvider.CONTENT_CITY_URI, cvCity);
 		}
 	}
 	
 	ArrayList<String> getCities() {
 		ArrayList<String> res = new ArrayList<String>();
-		
-		dbHelper = new DBHelper(context);
-		SQLiteDatabase db = dbHelper.getWritableDatabase();
-		Cursor c = db.query("cities", null, null, null, null, null, null);
+		Cursor c = context.getContentResolver().query(WeatherContentProvider.CONTENT_CITY_URI, null, null, null, null);
 		if (c == null) {
 			res = null;
 		} else {
@@ -235,17 +207,12 @@ public class WeatherDatabase {
 				} while (c.moveToNext());
 			}
 		}
-		dbHelper.close();
 		return res;
 	}
 	
 	void clearTables() {
-		dbHelper = new DBHelper(context);
-		SQLiteDatabase db = dbHelper.getWritableDatabase();
-		
-		db.delete("weather", null, null);
-		db.delete("cities", null, null);
-		dbHelper.close();
+		context.getContentResolver().delete(WeatherContentProvider.CONTENT_CITY_URI, null, null);
+		context.getContentResolver().delete(WeatherContentProvider.CONTENT_WEATHER_URI, null, null);
 	}
 	
 	private void logCursor(Cursor c) {
@@ -284,33 +251,7 @@ public class WeatherDatabase {
 	    }
 	}
 	
-	class DBHelper extends SQLiteOpenHelper {
-		public DBHelper(Context context) {
-			super(context, "weather_db", null, 9);
-		}
 
-		@Override
-		public void onCreate(SQLiteDatabase db) {
-			String q;
-			q = "CREATE TABLE cities (id integer primary key autoincrement, title text, last_upd integer);";
-			db.execSQL(q);
-			q = "CREATE TABLE weather (" +
-					"id integer primary key autoincrement, " + 
-					"city_id integer, " + 
-					"date text, " +
-					"temp text, " +
-					"pressure text, " + 
-					"wind text, " +
-					"url_icon text, " +
-					"updated_icon text default \"0\", " +
-					"icon blob);";
-			db.execSQL(q);
-		}
-
-		@Override
-		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		}
-	}
 	
 	class WeatherUpdater extends AsyncTask<Void, Void, String> {
     	String urlData;
