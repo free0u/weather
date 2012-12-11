@@ -42,7 +42,7 @@ public class MainActivity extends Activity implements OnClickListener,
 
 	int updateTime = 60 * 60; // one hour
 
-	WeatherDatabase weatherDatabase;
+	WeatherDatabaseHelper weatherDatabase;
 
 	// change UI - update weather forecast
 	private void updateForecastWeather(ArrayList<Map<String, Object>> data) {
@@ -199,7 +199,7 @@ public class MainActivity extends Activity implements OnClickListener,
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		weatherDatabase = new WeatherDatabase(this);
+		weatherDatabase = new WeatherDatabaseHelper(this);
 
 		weather = new WeatherHelper();
 

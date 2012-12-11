@@ -19,7 +19,7 @@ public class Alarm extends BroadcastReceiver
 
          // Put here YOUR code.
          Log.i("db", "onReceive()");
-         WeatherDatabase wd = new WeatherDatabase(context);
+         WeatherDatabaseHelper wd = new WeatherDatabaseHelper(context);
          wd.updateAll();
          
          wl.release();

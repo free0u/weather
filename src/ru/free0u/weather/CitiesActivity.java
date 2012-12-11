@@ -18,14 +18,14 @@ import android.widget.AdapterView.OnItemClickListener;
 public class CitiesActivity extends Activity implements OnClickListener {
 	ListView listView;
 	String[] cities;
-	WeatherDatabase weatherDatabase = null;
+	WeatherDatabaseHelper weatherDatabase = null;
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.cities);
         
-        weatherDatabase = new WeatherDatabase(this);
+        weatherDatabase = new WeatherDatabaseHelper(this);
         
         Button bt = (Button)findViewById(R.id.button1);
         bt.setOnClickListener(this);
